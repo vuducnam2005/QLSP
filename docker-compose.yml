@@ -42,7 +42,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:18080}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
     container_name: product-management-frontend
     restart: unless-stopped
     depends_on:
