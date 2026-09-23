@@ -49,6 +49,10 @@ const topValue = computed(() => Math.max(...topInventoryValue.value.map((item) =
 const stockValue = computed(() => Math.max(...stockDistribution.value.map((item) => item.productCount), 1))
 const trendValue = computed(() => Math.max(...(trends.value?.points || []).map((item) => item.totalInventoryValue), 1))
 
+const emit = defineEmits<{
+  viewProduct: [productId: number]
+}>()
+
 function statusLabel(status: ProductStatus) {
   return statusLabels[status]
 }
@@ -170,7 +174,7 @@ onMounted(() => {
             <table class="analytics-table">
               <thead><tr><th>Sản phẩm</th><th>Trạng thái</th><th class="numeric">Tồn kho</th><th class="numeric">Giá trị tồn</th></tr></thead>
               <tbody>
-                <tr v-for="item in topInventoryValue" :key="item.productId">
+                <tr v-for="item in topInventoryValue" :key="item.productId" tabindex="0" title="Bấm để xem chi tiết sản phẩm" @click="emit('viewProduct', item.productId)" @keydown.enter="emit('viewProduct', item.productId)" @keydown.space.prevent="emit('viewProduct', item.productId)">
                   <td><div class="analytics-product"><span class="product-glyph">{{ item.name.slice(0, 1).toUpperCase() }}</span><span><strong>{{ item.name }}</strong><small>{{ item.productCode }}</small></span></div></td>
                   <td><span class="status-label" :class="item.status.toLowerCase()"><i></i>{{ statusLabel(item.status) }}</span></td>
                   <td class="numeric">{{ stockLabel(item.stockQuantity) }}</td>
@@ -183,9 +187,9 @@ onMounted(() => {
         </article>
 
         <article class="analytics-card low-stock-card">
-          <div class="analytics-card-heading"><div><p class="eyebrow">Cần chú ý</p><h2>Sắp hết hàng</h2></div><span class="record-count">ngưỡng &lt; {{ lowStockThreshold }}</span></div>
+          <div class="analytics-card-heading"><div><p class="eyebrow">Cần chú ý</p><h2>Sắp hết hàng</h2></div><span class="record-count">ngưỡng riêng / {{ lowStockThreshold }}</span></div>
           <div v-if="lowStockProducts.length" class="low-stock-list">
-            <div v-for="item in lowStockProducts" :key="item.productId" class="low-stock-row">
+            <div v-for="item in lowStockProducts" :key="item.productId" class="low-stock-row" role="button" tabindex="0" title="Bấm để xem chi tiết sản phẩm" @click="emit('viewProduct', item.productId)" @keydown.enter="emit('viewProduct', item.productId)" @keydown.space.prevent="emit('viewProduct', item.productId)">
               <span class="low-stock-index">{{ item.stockQuantity === 0 ? '!' : item.stockQuantity }}</span>
               <div><strong>{{ item.name }}</strong><small>{{ item.stockQuantity === 0 ? 'Hết hàng' : `Còn ${formatNumber(item.stockQuantity)} sản phẩm` }}</small></div>
               <span class="low-stock-value">{{ formatCurrency(item.inventoryValue, currency) }}</span>

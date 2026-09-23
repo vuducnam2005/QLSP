@@ -53,6 +53,36 @@ public class Product {
   @Column(columnDefinition = "TEXT")
   private String description;
 
+  @Column(length = 100)
+  private String category;
+
+  @Column(length = 100)
+  private String brand;
+
+  @Column(length = 255)
+  private String supplier;
+
+  @Column(length = 50)
+  private String unit;
+
+  @Column(name = "warehouse_location", length = 100)
+  private String warehouseLocation;
+
+  @Column(name = "warranty_months")
+  private Integer warrantyMonths;
+
+  @Column(length = 50)
+  private String barcode;
+
+  @Column(name = "cost_price", precision = 15, scale = 2)
+  private BigDecimal costPrice;
+
+  @Column(name = "minimum_stock")
+  private Integer minimumStock;
+
+  @Column(name = "image_url", length = 1000)
+  private String imageUrl;
+
   @NotNull
   @Column(nullable = false, precision = 15, scale = 2)
   private BigDecimal price;

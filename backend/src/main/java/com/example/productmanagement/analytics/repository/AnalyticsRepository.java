@@ -15,7 +15,7 @@ public interface AnalyticsRepository extends Repository<Product, Long> {
           SELECT
             COUNT(*) AS "totalProducts",
             COUNT(*) FILTER (WHERE status = 'ACTIVE') AS "activeProducts",
-            COUNT(*) FILTER (WHERE status = 'LOW_STOCK' OR stock_quantity < :threshold) AS "lowStockProducts",
+            COUNT(*) FILTER (WHERE status = 'LOW_STOCK' OR stock_quantity < COALESCE(minimum_stock, :threshold)) AS "lowStockProducts",
             COUNT(*) FILTER (WHERE stock_quantity = 0) AS "outOfStockProducts",
             COUNT(*) FILTER (WHERE status = 'INACTIVE') AS "inactiveProducts",
             COALESCE(SUM(stock_quantity), 0) AS "totalStockQuantity",
@@ -59,8 +59,9 @@ public interface AnalyticsRepository extends Repository<Product, Long> {
             SELECT
               stock_quantity,
               price,
+              minimum_stock,
               CASE WHEN status = 'INACTIVE' THEN 'INACTIVE'
-                   WHEN status = 'LOW_STOCK' OR stock_quantity < :threshold THEN 'LOW_STOCK'
+                   WHEN status = 'LOW_STOCK' OR stock_quantity < COALESCE(minimum_stock, :threshold) THEN 'LOW_STOCK'
                    ELSE 'ACTIVE' END AS status
             FROM products
             WHERE is_deleted = FALSE
@@ -80,6 +81,7 @@ public interface AnalyticsRepository extends Repository<Product, Long> {
             name AS "name",
             price AS "price",
             stock_quantity AS "stockQuantity",
+            minimum_stock AS "minimumStock",
             status AS "status",
             (price * stock_quantity) AS "inventoryValue"
           FROM products
@@ -95,8 +97,9 @@ public interface AnalyticsRepository extends Repository<Product, Long> {
           """
           SELECT id AS "productId", product_code AS "productCode", name AS "name", price AS "price",
                  stock_quantity AS "stockQuantity",
+                 minimum_stock AS "minimumStock",
                  CASE WHEN status = 'INACTIVE' THEN 'INACTIVE'
-                      WHEN status = 'LOW_STOCK' OR stock_quantity < :threshold THEN 'LOW_STOCK'
+                      WHEN status = 'LOW_STOCK' OR stock_quantity < COALESCE(minimum_stock, :threshold) THEN 'LOW_STOCK'
                       ELSE 'ACTIVE' END AS "status",
                  (price * stock_quantity) AS "inventoryValue"
           FROM products
@@ -117,11 +120,12 @@ public interface AnalyticsRepository extends Repository<Product, Long> {
             name AS "name",
             price AS "price",
             stock_quantity AS "stockQuantity",
+            minimum_stock AS "minimumStock",
             status AS "status",
             (price * stock_quantity) AS "inventoryValue"
           FROM products
           WHERE is_deleted = FALSE
-            AND (status = 'LOW_STOCK' OR stock_quantity < :threshold)
+            AND (status = 'LOW_STOCK' OR stock_quantity < COALESCE(minimum_stock, :threshold))
           ORDER BY stock_quantity ASC, (price * stock_quantity) ASC, id ASC
           LIMIT :limit
           """,
@@ -145,9 +149,10 @@ public interface AnalyticsRepository extends Repository<Product, Long> {
             SELECT
               price,
               stock_quantity,
+              minimum_stock,
               CASE
                 WHEN stock_quantity = 0 THEN 'OUT_OF_STOCK'
-                WHEN stock_quantity < :threshold THEN 'LOW_STOCK'
+                WHEN stock_quantity < COALESCE(minimum_stock, :threshold) THEN 'LOW_STOCK'
                 WHEN stock_quantity < 50 THEN '10_49'
                 WHEN stock_quantity < 100 THEN '50_99'
                 ELSE '100_PLUS'

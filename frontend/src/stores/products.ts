@@ -22,7 +22,7 @@ export const useProductsStore = defineStore('products', () => {
 
   const activeCount = computed(() => items.value.filter((product) => product.status === 'ACTIVE').length)
   const lowStockCount = computed(
-    () => items.value.filter((product) => product.status === 'LOW_STOCK' || product.stockQuantity < settingsStore.lowStockThreshold).length,
+    () => items.value.filter((product) => product.status === 'LOW_STOCK' || product.stockQuantity < (product.minimumStock ?? settingsStore.lowStockThreshold)).length,
   )
   const inactiveCount = computed(() => items.value.filter((product) => product.status === 'INACTIVE').length)
 

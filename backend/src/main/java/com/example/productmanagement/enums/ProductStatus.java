@@ -16,4 +16,13 @@ public enum ProductStatus {
     }
     return requested == null ? ACTIVE : requested;
   }
+
+  public static ProductStatus resolve(
+      Integer stockQuantity,
+      ProductStatus requested,
+      Integer productMinimumStock,
+      int lowStockThreshold) {
+    int threshold = productMinimumStock == null ? lowStockThreshold : productMinimumStock;
+    return resolve(stockQuantity, requested, threshold);
+  }
 }

@@ -21,6 +21,16 @@ const form = reactive({
   productCode: '',
   name: '',
   description: '',
+  category: '',
+  brand: '',
+  supplier: '',
+  unit: '',
+  warehouseLocation: '',
+  warrantyMonths: '',
+  barcode: '',
+  costPrice: '',
+  minimumStock: '',
+  imageUrl: '',
   price: '',
   stockQuantity: '',
   status: 'ACTIVE' as ProductStatus,
@@ -28,15 +38,31 @@ const form = reactive({
 
 const fieldErrors = reactive<Record<string, string>>({})
 const editing = computed(() => Boolean(props.product))
+const effectiveLowStockThreshold = computed(() => {
+  const minimumStock = Number(form.minimumStock)
+  return form.minimumStock !== '' && Number.isInteger(minimumStock) && minimumStock >= 0
+    ? minimumStock
+    : props.lowStockThreshold
+})
 const stockIsLow = computed(() => {
   const stockQuantity = Number(form.stockQuantity)
-  return form.stockQuantity !== '' && Number.isInteger(stockQuantity) && stockQuantity < props.lowStockThreshold
+  return form.stockQuantity !== '' && Number.isInteger(stockQuantity) && stockQuantity < effectiveLowStockThreshold.value
 })
 
 function resetForm() {
   form.productCode = props.product?.productCode || ''
   form.name = props.product?.name || ''
   form.description = props.product?.description || ''
+  form.category = props.product?.category || ''
+  form.brand = props.product?.brand || ''
+  form.supplier = props.product?.supplier || ''
+  form.unit = props.product?.unit || ''
+  form.warehouseLocation = props.product?.warehouseLocation || ''
+  form.warrantyMonths = props.product?.warrantyMonths == null ? '' : String(props.product.warrantyMonths)
+  form.barcode = props.product?.barcode || ''
+  form.costPrice = props.product?.costPrice == null ? '' : String(props.product.costPrice)
+  form.minimumStock = props.product?.minimumStock == null ? '' : String(props.product.minimumStock)
+  form.imageUrl = props.product?.imageUrl || ''
   form.price = props.product ? String(props.product.price) : ''
   form.stockQuantity = props.product ? String(props.product.stockQuantity) : ''
   form.status = props.product?.status || 'ACTIVE'
@@ -46,7 +72,7 @@ function resetForm() {
 
 watch(() => [props.open, props.product], resetForm, { immediate: true })
 watch(
-  () => form.stockQuantity,
+  () => [form.stockQuantity, form.minimumStock],
   () => {
     if (stockIsLow.value) form.status = 'LOW_STOCK'
   },
@@ -73,6 +99,18 @@ function validate() {
       ? 'Số lượng tồn kho phải là số nguyên.'
       : 'Số lượng tồn kho phải là số nguyên từ 0 trở lên.'
   }
+  const warrantyMonths = Number(form.warrantyMonths)
+  if (form.warrantyMonths !== '' && (!Number.isFinite(warrantyMonths) || !Number.isInteger(warrantyMonths) || warrantyMonths < 0)) {
+    fieldErrors.warrantyMonths = 'Thời hạn bảo hành phải là số nguyên từ 0 trở lên.'
+  }
+  const costPrice = Number(form.costPrice)
+  if (form.costPrice !== '' && (!Number.isFinite(costPrice) || costPrice < 0)) {
+    fieldErrors.costPrice = 'Giá nhập phải là số lớn hơn hoặc bằng 0.'
+  }
+  const minimumStock = Number(form.minimumStock)
+  if (form.minimumStock !== '' && (!Number.isFinite(minimumStock) || !Number.isInteger(minimumStock) || minimumStock < 0)) {
+    fieldErrors.minimumStock = 'Tồn kho tối thiểu phải là số nguyên từ 0 trở lên.'
+  }
   return Object.keys(fieldErrors).length === 0
 }
 
@@ -81,6 +119,16 @@ function submit() {
   const base = {
     name: form.name.trim(),
     description: form.description.trim() || null,
+    category: form.category.trim() || null,
+    brand: form.brand.trim() || null,
+    supplier: form.supplier.trim() || null,
+    unit: form.unit.trim() || null,
+    warehouseLocation: form.warehouseLocation.trim() || null,
+    warrantyMonths: form.warrantyMonths === '' ? null : Number(form.warrantyMonths),
+    barcode: form.barcode.trim() || null,
+    costPrice: form.costPrice === '' ? null : Number(form.costPrice),
+    minimumStock: form.minimumStock === '' ? null : Number(form.minimumStock),
+    imageUrl: form.imageUrl.trim() || null,
     price: Number(form.price),
     stockQuantity: Number(form.stockQuantity),
     status: form.status,
@@ -134,8 +182,71 @@ function submit() {
 
           <label class="field">
              <span>Mô tả <em>Không bắt buộc</em></span>
-             <textarea v-model="form.description" placeholder="Mô tả công dụng của sản phẩm" maxlength="5000" rows="3"></textarea>
+            <textarea v-model="form.description" placeholder="Mô tả công dụng của sản phẩm" maxlength="5000" rows="3"></textarea>
           </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Danh mục <em>Không bắt buộc</em></span>
+              <input v-model="form.category" placeholder="Ví dụ: Phụ kiện máy tính" maxlength="100" />
+            </label>
+            <label class="field">
+              <span>Thương hiệu <em>Không bắt buộc</em></span>
+              <input v-model="form.brand" placeholder="Ví dụ: Logitech" maxlength="100" />
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Mã vạch <em>Không bắt buộc</em></span>
+              <input v-model="form.barcode" inputmode="numeric" placeholder="Ví dụ: 8938501230001" maxlength="50" />
+            </label>
+            <label class="field">
+              <span>Tồn kho tối thiểu <em>Cảnh báo</em></span>
+              <input v-model="form.minimumStock" inputmode="numeric" type="number" min="0" step="1" placeholder="Theo cài đặt chung" :aria-invalid="Boolean(fieldErrors.minimumStock)" aria-describedby="minimum-stock-error" />
+              <small v-if="fieldErrors.minimumStock" id="minimum-stock-error" class="field-error">{{ fieldErrors.minimumStock }}</small>
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Giá nhập <em>Không bắt buộc</em></span>
+              <div class="input-prefix"><b>₫</b><input v-model="form.costPrice" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0" :aria-invalid="Boolean(fieldErrors.costPrice)" aria-describedby="cost-price-error" /></div>
+              <small v-if="fieldErrors.costPrice" id="cost-price-error" class="field-error">{{ fieldErrors.costPrice }}</small>
+            </label>
+            <label class="field">
+              <span>Ảnh sản phẩm <em>URL</em></span>
+              <input v-model="form.imageUrl" type="url" placeholder="https://..." maxlength="1000" />
+            </label>
+          </div>
+
+          <div v-if="form.imageUrl" :key="form.imageUrl" class="image-url-preview">
+            <img :src="form.imageUrl" alt="Xem trước ảnh sản phẩm" @error="($event.target as HTMLImageElement).style.display = 'none'" />
+            <span>Xem trước ảnh sản phẩm</span>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Nhà cung cấp <em>Không bắt buộc</em></span>
+              <input v-model="form.supplier" placeholder="Tên nhà cung cấp" maxlength="255" />
+            </label>
+            <label class="field">
+              <span>Đơn vị tính <em>Không bắt buộc</em></span>
+              <input v-model="form.unit" placeholder="Ví dụ: cái" maxlength="50" />
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Vị trí kho <em>Không bắt buộc</em></span>
+              <input v-model="form.warehouseLocation" placeholder="Ví dụ: Kệ A-01" maxlength="100" />
+            </label>
+            <label class="field">
+              <span>Bảo hành <em>Tháng</em></span>
+              <input v-model="form.warrantyMonths" inputmode="numeric" type="number" min="0" step="1" placeholder="Không giới hạn" :aria-invalid="Boolean(fieldErrors.warrantyMonths)" aria-describedby="warranty-error" />
+              <small v-if="fieldErrors.warrantyMonths" id="warranty-error" class="field-error">{{ fieldErrors.warrantyMonths }}</small>
+            </label>
+          </div>
 
           <div class="field-grid">
             <label class="field">
@@ -158,7 +269,7 @@ function submit() {
                <option value="INACTIVE">Ngừng hoạt động</option>
             </select>
             <small id="product-status-hint" class="field-hint">
-              {{ stockIsLow ? `Tồn kho dưới ${props.lowStockThreshold}: trạng thái được đặt tự động.` : 'Bạn có thể chọn thủ công.' }}
+              {{ stockIsLow ? `Tồn kho dưới ${effectiveLowStockThreshold}: trạng thái được đặt tự động.` : 'Bạn có thể chọn thủ công.' }}
             </small>
           </label>
 

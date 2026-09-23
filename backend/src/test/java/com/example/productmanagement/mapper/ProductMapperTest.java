@@ -19,6 +19,16 @@ class ProductMapperTest {
     request.setProductCode(" PRD-0009 ");
     request.setName("  Test product  ");
     request.setDescription("  Description  ");
+    request.setCategory("  Accessories  ");
+    request.setBrand("  Acme  ");
+    request.setSupplier("  Acme Distribution  ");
+    request.setUnit("  cái  ");
+    request.setWarehouseLocation("  Kệ A-01  ");
+    request.setWarrantyMonths(24);
+    request.setBarcode("8938501230009");
+    request.setCostPrice(new BigDecimal("7.50"));
+    request.setMinimumStock(8);
+    request.setImageUrl("https://example.com/product.png");
     request.setPrice(new BigDecimal("10.00"));
     request.setStockQuantity(4);
     request.setStatus(null);
@@ -28,6 +38,16 @@ class ProductMapperTest {
     assertThat(product.getProductCode()).isEqualTo("PRD-0009");
     assertThat(product.getName()).isEqualTo("Test product");
     assertThat(product.getDescription()).isEqualTo("Description");
+    assertThat(product.getCategory()).isEqualTo("Accessories");
+    assertThat(product.getBrand()).isEqualTo("Acme");
+    assertThat(product.getSupplier()).isEqualTo("Acme Distribution");
+    assertThat(product.getUnit()).isEqualTo("cái");
+    assertThat(product.getWarehouseLocation()).isEqualTo("Kệ A-01");
+    assertThat(product.getWarrantyMonths()).isEqualTo(24);
+    assertThat(product.getBarcode()).isEqualTo("8938501230009");
+    assertThat(product.getCostPrice()).isEqualByComparingTo("7.50");
+    assertThat(product.getMinimumStock()).isEqualTo(8);
+    assertThat(product.getImageUrl()).isEqualTo("https://example.com/product.png");
     assertThat(product.getStatus()).isEqualTo(ProductStatus.LOW_STOCK);
     assertThat(product.isDeleted()).isFalse();
   }
@@ -40,6 +60,21 @@ class ProductMapperTest {
     request.setPrice(new BigDecimal("10.00"));
     request.setStockQuantity(20);
     request.setStatus(ProductStatus.LOW_STOCK);
+
+    Product product = mapper.toEntity(request);
+
+    assertThat(product.getStatus()).isEqualTo(ProductStatus.LOW_STOCK);
+  }
+
+  @Test
+  void toEntityUsesProductMinimumStockWhenProvided() {
+    ProductCreateRequest request = new ProductCreateRequest();
+    request.setProductCode("PRD-0011");
+    request.setName("Product with custom threshold");
+    request.setPrice(new BigDecimal("10.00"));
+    request.setStockQuantity(8);
+    request.setMinimumStock(10);
+    request.setStatus(ProductStatus.ACTIVE);
 
     Product product = mapper.toEntity(request);
 

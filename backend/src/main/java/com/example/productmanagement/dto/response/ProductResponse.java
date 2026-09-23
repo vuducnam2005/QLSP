@@ -15,6 +15,16 @@ public class ProductResponse {
   private String productCode;
   private String name;
   private String description;
+  private String category;
+  private String brand;
+  private String supplier;
+  private String unit;
+  private String warehouseLocation;
+  private Integer warrantyMonths;
+  private String barcode;
+  private BigDecimal costPrice;
+  private Integer minimumStock;
+  private String imageUrl;
   private BigDecimal price;
   private Integer stockQuantity;
   private ProductStatus status;

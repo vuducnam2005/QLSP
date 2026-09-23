@@ -241,6 +241,16 @@ class ProductIntegrationTest {
                   "productCode": "PRD-9001",
                   "name": "Integration Test Product",
                   "description": "Created by integration test",
+                  "category": "Accessories",
+                  "brand": "Acme",
+                  "supplier": "Acme Distribution",
+                  "unit": "piece",
+                  "warehouseLocation": "A-01",
+                  "warrantyMonths": 12,
+                  "barcode": "8938501239001",
+                  "costPrice": 15.00,
+                  "minimumStock": 12,
+                  "imageUrl": "https://example.com/product.png",
                   "price": 25.50,
                   "stockQuantity": 10,
                   "status": "ACTIVE"
@@ -253,6 +263,16 @@ class ProductIntegrationTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.productCode").value("PRD-9001"))
+        .andExpect(jsonPath("$.data.category").value("Accessories"))
+        .andExpect(jsonPath("$.data.brand").value("Acme"))
+        .andExpect(jsonPath("$.data.supplier").value("Acme Distribution"))
+        .andExpect(jsonPath("$.data.unit").value("piece"))
+        .andExpect(jsonPath("$.data.warehouseLocation").value("A-01"))
+        .andExpect(jsonPath("$.data.warrantyMonths").value(12))
+        .andExpect(jsonPath("$.data.barcode").value("8938501239001"))
+        .andExpect(jsonPath("$.data.costPrice").value(15.00))
+        .andExpect(jsonPath("$.data.minimumStock").value(12))
+        .andExpect(jsonPath("$.data.imageUrl").value("https://example.com/product.png"))
         .andExpect(jsonPath("$.data.version").value(0));
 
     mockMvc
@@ -265,6 +285,16 @@ class ProductIntegrationTest {
                 {
                   "name": "Updated Integration Product",
                   "description": "Updated description",
+                  "category": "Updated Accessories",
+                  "brand": "Acme Pro",
+                  "supplier": "Acme Distribution",
+                  "unit": "piece",
+                  "warehouseLocation": "A-02",
+                  "warrantyMonths": 24,
+                  "barcode": "8938501239002",
+                  "costPrice": 18.00,
+                  "minimumStock": 10,
+                  "imageUrl": "https://example.com/updated-product.png",
                   "price": 30.00,
                   "stockQuantity": 8,
                   "status": "ACTIVE",
@@ -280,6 +310,8 @@ class ProductIntegrationTest {
                 .content(updatePayload))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.name").value("Updated Integration Product"))
+        .andExpect(jsonPath("$.data.costPrice").value(18.00))
+        .andExpect(jsonPath("$.data.minimumStock").value(10))
         .andExpect(jsonPath("$.data.status").value("LOW_STOCK"))
         .andExpect(jsonPath("$.data.version").value(1));
 

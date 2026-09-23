@@ -6,6 +6,16 @@ export interface Product {
   productCode: string
   name: string
   description: string | null
+  category: string | null
+  brand: string | null
+  supplier: string | null
+  unit: string | null
+  warehouseLocation: string | null
+  warrantyMonths: number | null
+  barcode: string | null
+  costPrice: number | null
+  minimumStock: number | null
+  imageUrl: string | null
   price: number
   stockQuantity: number
   status: ProductStatus
@@ -34,6 +44,16 @@ export interface ProductCreatePayload {
   productCode?: string | null
   name: string
   description: string | null
+  category: string | null
+  brand: string | null
+  supplier: string | null
+  unit: string | null
+  warehouseLocation: string | null
+  warrantyMonths: number | null
+  barcode: string | null
+  costPrice: number | null
+  minimumStock: number | null
+  imageUrl: string | null
   price: number
   stockQuantity: number
   status: ProductStatus
@@ -42,6 +62,16 @@ export interface ProductCreatePayload {
 export interface ProductUpdatePayload {
   name: string
   description: string | null
+  category: string | null
+  brand: string | null
+  supplier: string | null
+  unit: string | null
+  warehouseLocation: string | null
+  warrantyMonths: number | null
+  barcode: string | null
+  costPrice: number | null
+  minimumStock: number | null
+  imageUrl: string | null
   price: number
   stockQuantity: number
   status: ProductStatus

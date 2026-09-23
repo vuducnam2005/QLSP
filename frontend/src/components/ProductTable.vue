@@ -11,6 +11,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
+  view: [product: Product]
   edit: [product: Product]
   remove: [product: Product]
 }>()
@@ -54,9 +55,10 @@ const emit = defineEmits<{
           v-for="product in products"
           :key="product.id"
           tabindex="0"
-          @click="emit('edit', product)"
-          @keydown.enter="emit('edit', product)"
-          @keydown.space.prevent="emit('edit', product)"
+          title="Bấm để xem chi tiết sản phẩm"
+          @click="emit('view', product)"
+          @keydown.enter="emit('view', product)"
+          @keydown.space.prevent="emit('view', product)"
         >
           <td>
             <div class="product-cell">
@@ -75,9 +77,9 @@ const emit = defineEmits<{
           </td>
            <td class="numeric price-cell">{{ formatCurrency(product.price, currency) }}</td>
           <td class="numeric">
-            <span class="stock-value" :class="{ warning: product.stockQuantity < lowStockThreshold }">
+            <span class="stock-value" :class="{ warning: product.stockQuantity < (product.minimumStock ?? lowStockThreshold) }">
                {{ formatNumber(product.stockQuantity) }}
-               <small v-if="product.stockQuantity < lowStockThreshold">thấp</small>
+               <small v-if="product.stockQuantity < (product.minimumStock ?? lowStockThreshold)">dưới mức tối thiểu</small>
             </span>
           </td>
           <td><span class="date-label">{{ formatDate(product.updatedAt, dateFormat) }}</span></td>

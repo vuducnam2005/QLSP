@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import ProductDrawer from './components/ProductDrawer.vue'
+import ProductDetailDrawer from './components/ProductDetailDrawer.vue'
 import ProductTable from './components/ProductTable.vue'
 import AnalyticsView from './components/AnalyticsView.vue'
 import SettingsView from './components/SettingsView.vue'
@@ -15,7 +16,7 @@ import { useProductsStore } from './stores/products'
 import { useSettingsStore } from './stores/settings'
 import type { Product, ProductCreatePayload, ProductUpdatePayload } from './types/product'
 import { formatCurrency, formatNumber } from './utils/formatters'
-import { getProducts } from './api/products'
+import { getProduct, getProducts } from './api/products'
 
 const store = useProductsStore()
 const analyticsStore = useAnalyticsStore()
@@ -28,6 +29,8 @@ const statusDraft = ref('')
 const sortDraft = ref('updatedAt,desc')
 const drawerOpen = ref(false)
 const selectedProduct = ref<Product | null>(null)
+const detailOpen = ref(false)
+const detailProduct = ref<Product | null>(null)
 const productToRemove = ref<Product | null>(null)
 const toast = reactive({ visible: false, tone: 'success' as 'success' | 'error', title: '', detail: '' })
 
@@ -118,6 +121,11 @@ function localizeApiError(apiError: ApiError) {
       stockQuantity: 'Số lượng tồn kho',
       status: 'Trạng thái',
       version: 'Phiên bản',
+      warrantyMonths: 'Thời hạn bảo hành',
+      costPrice: 'Giá nhập',
+      minimumStock: 'Tồn kho tối thiểu',
+      barcode: 'Mã vạch',
+      imageUrl: 'Ảnh sản phẩm',
     }
     return Object.entries(apiError.details)
       .map(([field, message]) => {
@@ -311,12 +319,28 @@ function resetFilters() {
 
 function openCreate() {
   store.clearError()
+  detailOpen.value = false
   selectedProduct.value = null
   drawerOpen.value = true
 }
 
+function openDetail(product: Product) {
+  detailProduct.value = product
+  detailOpen.value = true
+}
+
+async function openDetailById(productId: number) {
+  try {
+    const response = await getProduct(productId)
+    openDetail(response.data)
+  } catch (caught) {
+    if (caught instanceof ApiError) notify('Không thể mở chi tiết', 'Sản phẩm không còn tồn tại hoặc chưa thể tải dữ liệu.', 'error')
+  }
+}
+
 function openEdit(product: Product) {
   store.clearError()
+  detailOpen.value = false
   selectedProduct.value = product
   drawerOpen.value = true
 }
@@ -376,7 +400,11 @@ async function changePage(nextPage: number) {
 }
 
 watch(drawerOpen, (open) => {
-  document.body.classList.toggle('drawer-open', open)
+  document.body.classList.toggle('drawer-open', open || detailOpen.value)
+})
+
+watch(detailOpen, (open) => {
+  document.body.classList.toggle('drawer-open', open || drawerOpen.value)
 })
 
 function handleGlobalKeydown(event: KeyboardEvent) {
@@ -385,6 +413,8 @@ function handleGlobalKeydown(event: KeyboardEvent) {
     productToRemove.value = null
   } else if (drawerOpen.value && !saving.value) {
     drawerOpen.value = false
+  } else if (detailOpen.value) {
+    detailOpen.value = false
   }
 }
 
@@ -633,7 +663,7 @@ onBeforeUnmount(() => {
           <button class="text-button" type="button" @click="store.fetchProducts">Thử lại</button>
         </div>
 
-        <ProductTable :products="displayedProducts" :loading="loading && items.length === 0" :currency="settingsStore.currency" :date-format="settingsStore.dateFormat" :low-stock-threshold="settingsStore.lowStockThreshold" @edit="openEdit" @remove="openDelete" />
+        <ProductTable :products="displayedProducts" :loading="loading && items.length === 0" :currency="settingsStore.currency" :date-format="settingsStore.dateFormat" :low-stock-threshold="settingsStore.lowStockThreshold" @view="openDetail" @edit="openEdit" @remove="openDelete" />
 
         <div v-if="page.totalPages > 1" class="pagination">
             <span>Trang {{ page.pageNo + 1 }} / {{ page.totalPages }}</span>
@@ -646,12 +676,13 @@ onBeforeUnmount(() => {
 
       <footer class="app-footer"><span>Quản lý sản phẩm</span><span>Dữ liệu được đồng bộ trực tiếp với hệ thống</span></footer>
       </template>
-      <AnalyticsView v-else-if="activeView === 'analytics'" />
+      <AnalyticsView v-else-if="activeView === 'analytics'" @view-product="openDetailById" />
       <SettingsView v-else @saved="onSettingsSaved" />
     </main>
   </div>
 
   <ProductDrawer :open="drawerOpen" :product="selectedProduct" :saving="saving" :error-message="drawerError" :low-stock-threshold="settingsStore.lowStockThreshold" :product-code-prefix="settingsStore.productCodePrefix" :allow-negative-stock="settingsStore.allowNegativeStock" @close="drawerOpen = false" @save="saveProduct" />
+  <ProductDetailDrawer :open="detailOpen" :product="detailProduct" :currency="settingsStore.currency" :date-format="settingsStore.dateFormat" :low-stock-threshold="settingsStore.lowStockThreshold" @close="detailOpen = false" @edit="openEdit" />
   <ConfirmDialog :open="Boolean(productToRemove)" :product-name="productToRemove?.name || ''" :busy="saving" @cancel="productToRemove = null" @confirm="confirmDelete" />
 
   <Transition name="toast">
