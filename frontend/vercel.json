@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/api/:path*",
+      "destination": "https://qlsp-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/actuator/:path*",
+      "destination": "https://qlsp-backend.onrender.com/actuator/:path*"
+    },
+    {
+      "source": "/((?!api|actuator).*)",
       "destination": "/index.html"
     }
   ]

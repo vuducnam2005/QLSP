@@ -1,6 +1,10 @@
 const rawBaseUrl = import.meta.env.VITE_API_BASE_URL
-const API_BASE_URL =
-  typeof rawBaseUrl === 'string'
+const isVercel =
+  typeof window !== 'undefined' &&
+  (window.location.hostname.endsWith('vercel.app') || window.location.hostname.includes('vercel'))
+const API_BASE_URL = isVercel
+  ? ''
+  : typeof rawBaseUrl === 'string' && rawBaseUrl.length > 0
     ? rawBaseUrl.replace(/\/+$/, '')
     : (import.meta.env.DEV ? '' : 'http://localhost:18080')
 
