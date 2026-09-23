@@ -1,6 +1,7 @@
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== 'http://localhost:8080'
-    ? import.meta.env.VITE_API_BASE_URL
+  rawBaseUrl && rawBaseUrl !== 'http://localhost:8080'
+    ? rawBaseUrl.replace(/\/+$/, '')
     : 'http://localhost:18080'
 
 let unauthorizedHandler: (() => void) | null = null

@@ -94,8 +94,12 @@ public class SecurityConfig {
   }
 
   @Bean
-  public CsrfTokenRepository csrfTokenRepository() {
-    return CookieCsrfTokenRepository.withHttpOnlyFalse();
+  public CsrfTokenRepository csrfTokenRepository(
+      @org.springframework.beans.factory.annotation.Value("${server.servlet.session.cookie.same-site:LAX}") String sameSite,
+      @org.springframework.beans.factory.annotation.Value("${server.servlet.session.cookie.secure:false}") boolean secure) {
+    CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+    repository.setCookieCustomizer(cookie -> cookie.sameSite(sameSite).secure(secure));
+    return repository;
   }
 
   private AuthenticationEntryPoint apiAuthenticationEntryPoint(ObjectMapper objectMapper) {
