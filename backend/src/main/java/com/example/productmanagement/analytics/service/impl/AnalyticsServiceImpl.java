@@ -92,9 +92,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             ? analyticsRepository.getTopInventoryValue(limit)
             : analyticsRepository.getTopInventoryValue(limit, lowStockThreshold());
     if (topProducts == null) topProducts = java.util.List.of();
-    return topProducts.stream()
-        .map(this::toProductResponse)
-        .toList();
+    return topProducts.stream().map(this::toProductResponse).toList();
   }
 
   @Override
@@ -105,9 +103,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             ? analyticsRepository.getLowStock(limit)
             : analyticsRepository.getLowStock(limit, lowStockThreshold());
     if (lowStock == null) lowStock = java.util.List.of();
-    return lowStock.stream()
-        .map(this::toProductResponse)
-        .toList();
+    return lowStock.stream().map(this::toProductResponse).toList();
   }
 
   @Override

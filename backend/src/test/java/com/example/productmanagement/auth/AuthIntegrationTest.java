@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.productmanagement.repository.SettingsRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,8 +19,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import com.example.productmanagement.repository.SettingsRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -89,9 +89,7 @@ class AuthIntegrationTest {
     mockMvc
         .perform(post("/api/v1/auth/logout").with(csrf()).session(session))
         .andExpect(status().isOk());
-    mockMvc
-        .perform(get("/api/v1/products").session(session))
-        .andExpect(status().isUnauthorized());
+    mockMvc.perform(get("/api/v1/products").session(session)).andExpect(status().isUnauthorized());
   }
 
   @Test

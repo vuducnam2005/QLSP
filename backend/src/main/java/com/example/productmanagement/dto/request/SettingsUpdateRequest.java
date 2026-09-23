@@ -40,9 +40,7 @@ public class SettingsUpdateRequest {
   private String currency;
 
   @NotBlank(message = "dateFormat is required")
-  @Pattern(
-      regexp = "DD/MM/YYYY|MM/DD/YYYY|YYYY-MM-DD",
-      message = "dateFormat is not supported")
+  @Pattern(regexp = "DD/MM/YYYY|MM/DD/YYYY|YYYY-MM-DD", message = "dateFormat is not supported")
   private String dateFormat;
 
   @Valid private PasswordChangeRequest password;

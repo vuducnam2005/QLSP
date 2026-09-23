@@ -36,6 +36,8 @@ public class SettingsController {
       @Valid @RequestBody SettingsUpdateRequest request) {
     return ResponseEntity.ok(
         ApiResponse.success(
-            HttpStatus.OK.value(), "Đã lưu cài đặt hệ thống", settingsService.updateCurrent(request)));
+            HttpStatus.OK.value(),
+            "Đã lưu cài đặt hệ thống",
+            settingsService.updateCurrent(request)));
   }
 }

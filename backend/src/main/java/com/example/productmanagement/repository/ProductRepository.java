@@ -11,5 +11,4 @@ public interface ProductRepository
   boolean existsByProductCode(String productCode);
 
   Optional<Product> findByIdAndDeletedFalse(Long id);
-
 }

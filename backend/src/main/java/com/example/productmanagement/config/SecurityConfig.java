@@ -21,8 +21,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
 public class SecurityConfig {
@@ -42,8 +42,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, ObjectMapper objectMapper, CsrfTokenRepository csrfTokenRepository)
       throws Exception {
-    return http
-        .cors(Customizer.withDefaults())
+    return http.cors(Customizer.withDefaults())
         .csrf(
             csrf ->
                 csrf.csrfTokenRepository(csrfTokenRepository)
@@ -53,7 +52,8 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
         .securityContext(
-            securityContext -> securityContext.securityContextRepository(securityContextRepository()))
+            securityContext ->
+                securityContext.securityContextRepository(securityContextRepository()))
         .authorizeHttpRequests(
             authorize ->
                 authorize.requestMatchers(PUBLIC_PATHS).permitAll().anyRequest().authenticated())
@@ -95,8 +95,12 @@ public class SecurityConfig {
 
   @Bean
   public CsrfTokenRepository csrfTokenRepository(
-      @org.springframework.beans.factory.annotation.Value("${server.servlet.session.cookie.same-site:LAX}") String sameSite,
-      @org.springframework.beans.factory.annotation.Value("${server.servlet.session.cookie.secure:false}") boolean secure) {
+      @org.springframework.beans.factory.annotation.Value(
+              "${server.servlet.session.cookie.same-site:LAX}")
+          String sameSite,
+      @org.springframework.beans.factory.annotation.Value(
+              "${server.servlet.session.cookie.secure:false}")
+          boolean secure) {
     CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
     repository.setCookieCustomizer(cookie -> cookie.sameSite(sameSite).secure(secure));
     return repository;
@@ -109,7 +113,8 @@ public class SecurityConfig {
 
   private AccessDeniedHandler apiAccessDeniedHandler(ObjectMapper objectMapper) {
     return (request, response, exception) ->
-        writeSecurityError(response, objectMapper, 403, "Bạn không có quyền truy cập tài nguyên này");
+        writeSecurityError(
+            response, objectMapper, 403, "Bạn không có quyền truy cập tài nguyên này");
   }
 
   private void writeSecurityError(
