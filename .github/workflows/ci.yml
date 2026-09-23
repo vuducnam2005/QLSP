@@ -1,0 +1,44 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Verify backend
+        working-directory: backend
+        run: ./mvnw -B verify
+
+      - name: Check formatting
+        working-directory: backend
+        run: ./mvnw -B spotless:check
+
+      - name: Upload JaCoCo report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: backend/target/site/jacoco/
+
+      - name: Dependency vulnerability scan
+        working-directory: backend
+        run: ./mvnw -B org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=9
