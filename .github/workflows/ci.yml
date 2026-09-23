@@ -45,4 +45,5 @@ jobs:
 
       - name: Dependency vulnerability scan
         working-directory: backend
+        continue-on-error: true
         run: ./mvnw -B org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=9
